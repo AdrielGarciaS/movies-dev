@@ -16,6 +16,8 @@ export const Select = (props: Props) => {
 
   return (
     <ChakraSelect variant="filled" onChange={onSelect} value={value}>
+      <option value="">All</option>
+
       {options.map(option => (
         <option key={option} value={option}>
           {option}

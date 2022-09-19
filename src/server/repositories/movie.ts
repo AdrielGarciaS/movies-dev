@@ -30,6 +30,13 @@ const filterByGenre = (movies: Movie[], genre: string) => {
   return movies.filter(movie => movie.genre.includes(genre));
 };
 
+const movieAdapter = (movie: Movie): AdaptedMovie => {
+  return {
+    ...movie,
+    genres: movie.genre.join(', '),
+  };
+};
+
 interface GetMoviesParams {
   q?: string;
   page?: number;
@@ -37,7 +44,14 @@ interface GetMoviesParams {
   genre?: string;
 }
 
-export const getMovies = async (params: GetMoviesParams) => {
+interface GetMoviesResponse {
+  movies: AdaptedMovie[];
+  totalPages: number;
+}
+
+export const getMovies = async (
+  params: GetMoviesParams,
+): Promise<GetMoviesResponse> => {
   const { q, page = 1, pageSize = 10, genre = '' } = params;
 
   const response = await axios.get<Movie[]>(MoviesApi.GET_MOVIES);
@@ -61,12 +75,12 @@ export const getMovies = async (params: GetMoviesParams) => {
 
     const totalPages = Math.ceil(filteredMovies.length / pageSize);
 
-    return { movies: paginatedMovies, totalPages };
+    return { movies: paginatedMovies.map(movieAdapter), totalPages };
   }
 
   const paginatedMovies = paginateMovies(filteredByGenre, page, pageSize);
 
   const totalPages = Math.ceil(paginatedMovies.length / pageSize);
 
-  return { movies: paginatedMovies, totalPages };
+  return { movies: paginatedMovies.map(movieAdapter), totalPages };
 };

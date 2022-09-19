@@ -12,3 +12,7 @@ interface Movie {
   description: string;
   actors: string[];
 }
+
+interface AdaptedMovie extends Movie {
+  genres: string;
+}
