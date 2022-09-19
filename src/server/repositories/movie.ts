@@ -59,10 +59,14 @@ export const getMovies = async (params: GetMoviesParams) => {
 
     const paginatedMovies = paginateMovies(filteredMovies, page, pageSize);
 
-    return paginatedMovies;
+    const totalPages = Math.ceil(filteredMovies.length / pageSize);
+
+    return { movies: paginatedMovies, totalPages };
   }
 
   const paginatedMovies = paginateMovies(filteredByGenre, page, pageSize);
 
-  return paginatedMovies;
+  const totalPages = Math.ceil(paginatedMovies.length / pageSize);
+
+  return { movies: paginatedMovies, totalPages };
 };
