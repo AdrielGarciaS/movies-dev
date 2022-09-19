@@ -8,6 +8,7 @@ import {
   Th,
   Thead,
   Tr,
+  useDisclosure,
 } from '@chakra-ui/react';
 import { useDebounce } from 'use-debounce';
 import { GetServerSideProps } from 'next';
@@ -17,6 +18,7 @@ import { Select } from 'components/Select';
 
 import { getGenres, getMovies } from 'server/repositories/movie';
 import { getClientMovies } from 'services/repositories/movie';
+import { CommentsModal } from 'components/CommentsModal';
 
 interface Props {
   initialMovies: AdaptedMovie[];
@@ -28,10 +30,13 @@ const Home = (props: Props) => {
   const { initialMovies, totalPages, genres } = props;
 
   const [movies, setMovies] = useState(initialMovies);
+  const [selectedMovie, setSelectedMovie] = useState<AdaptedMovie | null>(null);
   const [genre, setGenre] = useState('');
   const [title, setTitle] = useState('');
 
   const [debouncedTitle] = useDebounce(title, 300);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const router = useRouter();
 
@@ -72,6 +77,11 @@ const Home = (props: Props) => {
     setTitle(event.target.value);
   };
 
+  const onSelectMovie = (movie: AdaptedMovie) => () => {
+    setSelectedMovie(movie);
+    onOpen();
+  };
+
   return (
     <Center>
       <TableContainer w="full" maxW="80%">
@@ -110,7 +120,11 @@ const Home = (props: Props) => {
 
           <Tbody>
             {movies.map(movie => (
-              <Tr key={movie.title}>
+              <Tr
+                key={movie.title}
+                _hover={{ bg: 'gray.200', cursor: 'pointer' }}
+                onClick={onSelectMovie(movie)}
+              >
                 <Td>{movie.title}</Td>
                 <Td>{movie.year}</Td>
                 <Td>{movie.runtime}</Td>
@@ -122,6 +136,8 @@ const Home = (props: Props) => {
           </Tbody>
         </Table>
       </TableContainer>
+
+      <CommentsModal isOpen={isOpen} onClose={onClose} movie={selectedMovie} />
     </Center>
   );
 };
