@@ -1,0 +1,6 @@
+*.js
+*.json
+node_modules
+material-dashboard
+dist
+build
