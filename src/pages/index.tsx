@@ -1,14 +1,16 @@
 import {
-  Center,
+  HStack,
   Input,
   Table,
   TableContainer,
   Tbody,
   Td,
+  Text,
   Th,
   Thead,
   Tr,
   useDisclosure,
+  VStack,
 } from '@chakra-ui/react';
 import { useDebounce } from 'use-debounce';
 import { GetServerSideProps } from 'next';
@@ -20,19 +22,22 @@ import { getGenres, getMovies } from 'server/repositories/movie';
 import { getClientMovies } from 'services/repositories/movie';
 import { CommentsModal } from 'components/CommentsModal';
 
+const registersPerPageOptions = ['20', '50', '100'];
+
 interface Props {
   initialMovies: AdaptedMovie[];
-  totalPages: number;
+  totalRegisters: number;
   genres: string[];
 }
 
 const Home = (props: Props) => {
-  const { initialMovies, totalPages, genres } = props;
+  const { initialMovies, totalRegisters, genres } = props;
 
   const [movies, setMovies] = useState(initialMovies);
   const [selectedMovie, setSelectedMovie] = useState<AdaptedMovie | null>(null);
   const [genre, setGenre] = useState('');
   const [title, setTitle] = useState('');
+  const [perPage, setPerPage] = useState('20');
 
   const [debouncedTitle] = useDebounce(title, 300);
 
@@ -41,14 +46,16 @@ const Home = (props: Props) => {
   const router = useRouter();
 
   const loadMovies = async (q?: string) => {
-    const data = await getClientMovies({ q, genre });
+    const _perPage = perPage === '' ? totalRegisters : Number(perPage);
+
+    const data = await getClientMovies({ q, genre, pageSize: _perPage });
 
     setMovies(data.movies);
   };
 
   useEffect(() => {
     loadMovies(debouncedTitle);
-  }, [debouncedTitle, genre]);
+  }, [debouncedTitle, genre, perPage]);
 
   useEffect(() => {
     const query: Record<string, string> = {};
@@ -57,20 +64,27 @@ const Home = (props: Props) => {
 
     if (debouncedTitle) query.q = debouncedTitle;
 
+    if (perPage) query.perPage = perPage;
+
     router.push('/', { query }, { shallow: true });
-  }, [debouncedTitle, genre]);
+  }, [debouncedTitle, genre, perPage]);
 
   useEffect(() => {
     const { query } = router;
 
     if (!query.genre && !query.q) return;
 
-    setGenre(query.genre as string);
-    setTitle(query.q as string);
+    setGenre((query.genre ?? '') as string);
+    setTitle((query.q ?? '') as string);
+    setPerPage((query.perPage ?? '') as string);
   }, []);
 
   const onGenreChange = (value: string) => {
     setGenre(value);
+  };
+
+  const onPerPageChange = (value: string) => {
+    setPerPage(value);
   };
 
   const onChangeTitle = (event: ChangeEvent<HTMLInputElement>) => {
@@ -88,7 +102,17 @@ const Home = (props: Props) => {
   };
 
   return (
-    <Center>
+    <VStack pb="3rem">
+      <HStack>
+        <Text whiteSpace="nowrap">Registers per page:</Text>
+
+        <Select
+          options={registersPerPageOptions}
+          value={perPage}
+          onChange={onPerPageChange}
+        />
+      </HStack>
+
       <TableContainer w="full" maxW="80%">
         <Table variant="striped" colorScheme="gray">
           <Thead>
@@ -147,7 +171,7 @@ const Home = (props: Props) => {
         onClose={onCloseCommentsModal}
         movie={selectedMovie}
       />
-    </Center>
+    </VStack>
   );
 };
 
@@ -172,7 +196,7 @@ export const getServerSideProps: GetServerSideProps<Props> = async ctx => {
   return {
     props: {
       initialMovies: initialMovies.movies,
-      totalPages: initialMovies.totalPages,
+      totalRegisters: initialMovies.totalRegisters,
       genres,
     },
   };

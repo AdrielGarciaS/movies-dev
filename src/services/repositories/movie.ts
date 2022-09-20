@@ -7,11 +7,13 @@ export interface GetClientMoviesParams {
   genre?: string;
 }
 
+interface GetClientMoviesResponse {
+  totalRegisters: number;
+  movies: AdaptedMovie[];
+}
+
 export const getClientMovies = async (params: GetClientMoviesParams) => {
-  const response = await api.get<{
-    totalPages: number;
-    movies: AdaptedMovie[];
-  }>('/movies', {
+  const response = await api.get<GetClientMoviesResponse>('/movies', {
     params,
   });
 

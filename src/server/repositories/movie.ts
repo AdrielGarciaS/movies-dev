@@ -50,7 +50,7 @@ interface GetMoviesParams {
 
 interface GetMoviesResponse {
   movies: AdaptedMovie[];
-  totalPages: number;
+  totalRegisters: number;
 }
 
 export const getMovies = async (
@@ -77,16 +77,22 @@ export const getMovies = async (
 
     const paginatedMovies = paginateMovies(filteredMovies, page, pageSize);
 
-    const totalPages = Math.ceil(filteredMovies.length / pageSize);
+    const totalRegisters = filteredMovies.length;
 
-    return { movies: paginatedMovies.map(movieAdapter), totalPages };
+    return {
+      movies: paginatedMovies.map(movieAdapter),
+      totalRegisters,
+    };
   }
 
   const paginatedMovies = paginateMovies(filteredByGenre, page, pageSize);
 
-  const totalPages = Math.ceil(paginatedMovies.length / pageSize);
+  const totalRegisters = filteredByGenre.length;
 
-  return { movies: paginatedMovies.map(movieAdapter), totalPages };
+  return {
+    movies: paginatedMovies.map(movieAdapter),
+    totalRegisters,
+  };
 };
 
 export const createMovieComment = async (
