@@ -1,4 +1,8 @@
 import axios from 'axios';
+import { addDoc, collection, getDocs } from 'firebase/firestore';
+import { v4 as uuid } from 'uuid';
+
+import { database } from 'server/services/firebase';
 
 import { MoviesApi } from 'utils/constants';
 
@@ -83,4 +87,30 @@ export const getMovies = async (
   const totalPages = Math.ceil(paginatedMovies.length / pageSize);
 
   return { movies: paginatedMovies.map(movieAdapter), totalPages };
+};
+
+export const createMovieComment = async (
+  params: MovieComment,
+): Promise<AdaptedMovieComment> => {
+  const { title, comment } = params;
+
+  const dbInstance = collection(database, 'comment');
+
+  await addDoc(dbInstance, { title, comment });
+
+  return { id: uuid(), title, comment };
+};
+
+export const getComments = async (): Promise<AdaptedMovieComment[]> => {
+  const dbInstance = collection(database, 'comment');
+
+  const response = await getDocs(dbInstance);
+
+  const comments = response.docs.map<AdaptedMovieComment>(item => {
+    const { title, comment } = item.data();
+
+    return { id: uuid(), title, comment };
+  });
+
+  return comments;
 };

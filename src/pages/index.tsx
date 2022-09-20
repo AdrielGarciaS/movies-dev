@@ -82,6 +82,11 @@ const Home = (props: Props) => {
     onOpen();
   };
 
+  const onCloseCommentsModal = () => {
+    onClose();
+    setSelectedMovie(null);
+  };
+
   return (
     <Center>
       <TableContainer w="full" maxW="80%">
@@ -137,7 +142,11 @@ const Home = (props: Props) => {
         </Table>
       </TableContainer>
 
-      <CommentsModal isOpen={isOpen} onClose={onClose} movie={selectedMovie} />
+      <CommentsModal
+        isOpen={isOpen}
+        onClose={onCloseCommentsModal}
+        movie={selectedMovie}
+      />
     </Center>
   );
 };

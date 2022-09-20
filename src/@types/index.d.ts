@@ -16,3 +16,12 @@ interface Movie {
 interface AdaptedMovie extends Movie {
   genres: string;
 }
+
+interface MovieComment {
+  title: string;
+  comment: string;
+}
+
+interface AdaptedMovieComment extends MovieComment {
+  id: string;
+}
